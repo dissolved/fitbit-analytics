@@ -48,7 +48,7 @@ def get_intraday(client, resource = 'activities/steps', date = date.today()):
     return data
 
 
-@rate_limited(150,3600)
+@rate_limited(299,7200)
 def fetch_intraday(client, resource = 'activities/steps', date = date.today()):
     print("Retrieving {} intraday for {}".format(resource, date))
     return client.intraday_time_series(resource, base_date = date)
