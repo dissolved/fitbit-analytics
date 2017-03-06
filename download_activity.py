@@ -47,6 +47,21 @@ def get_intraday(client, resource = 'activities/steps', date = date.today()):
 
     return data
 
+def get_sleep(client, date):
+    path = os.path.join(DATA_DIR, 'sleep', str(date) + '.json')
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            data = json.load(f)
+    else:
+        data = fetch_sleep(client, date)
+        save_intraday(data, path)
+
+    return data
+
+@rate_limited(299,7200)
+def fetch_sleep(client, date):
+    print("Retrieving sleep data for {}".format(date))
+    return client.get_sleep(date)
 
 @rate_limited(299,7200)
 def fetch_intraday(client, resource = 'activities/steps', date = date.today()):
@@ -59,5 +74,10 @@ if __name__ == '__main__':
 
     start_date = date(2013, 1, 5)
     delta = date.today() - start_date
+    activities = ('steps','floors','elevation','distance','calories')
     for day in (start_date + timedelta(n) for n in range(delta.days)):
-        data = get_intraday(client, resource = 'activities/calories', date = day)
+        get_sleep(client, day)
+        for resource in activities:
+            get_intraday(client,
+                        resource = "activities/{}".format(resource),
+                        date = day)
