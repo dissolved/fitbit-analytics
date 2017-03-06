@@ -51,13 +51,10 @@ def get_intraday(client, resource = 'activities/steps', date = date.today()):
 @rate_limited(150,3600)
 def fetch_intraday(client, resource = 'activities/steps', date = date.today()):
     print("Retrieving {} intraday for {}".format(resource, date))
-    return client.intraday_time_series(resource, base_date = '2017-02-20')
+    return client.intraday_time_series(resource, base_date = date)
 
 
 if __name__ == '__main__':
-    # if not os.path.exists(DATA_DIR):
-    #     os.makedirs(DATA_DIR)
-
     client = get_client()
 
     start_date = date(2013, 1, 5)
