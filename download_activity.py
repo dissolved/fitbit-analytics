@@ -8,7 +8,7 @@ import json
 import os
 
 DATA_DIR = "intraday_data"
-
+HOURLY_API_LIMIT = 150
 
 def refresh_tokens(dict):
     with open('tokens.json') as token_file:
@@ -60,25 +60,33 @@ def get_sleep(client, date):
     return data
 
 
-@rate_limited(299,7200)
 def fetch_sleep(client, date):
     print("Retrieving sleep data for {}".format(date))
     return client.get_sleep(date)
 
 
-@rate_limited(299,7200)
 def fetch_intraday(client, resource = 'activities/steps', date = date.today()):
     print("Retrieving {} intraday for {}".format(resource, date))
     return client.intraday_time_series(resource, base_date = date)
 
 
-def fitbit_download():
+def fitbit_download(start_date, quick = True):
     client = get_client()
 
-    start_date = date(2013, 1, 5)
+    # if quick:
+    #     start_date = first_missing_date_since
+
+    yesterday = date.today() - timedelta(1)
     delta = date.today() - start_date
     activities = ('steps','floors','elevation','distance','calories')
-    for day in (start_date + timedelta(n) for n in range(delta.days)):
+
+    if len(activities)*delta.days > HOURLY_API_LIMIT:
+        global fetch_intraday
+        global fetch_sleep
+        fetch_intraday = rate_limited(2*HOURLY_API_LIMIT - 1, 7200)(fetch_intraday)
+        fetch_sleep = rate_limited(2*HOURLY_API_LIMIT - 1, 7200)(fetch_sleep)
+
+    for day in (yesterday - timedelta(n) for n in range(delta.days)):
         get_sleep(client, day)
         for resource in activities:
             get_intraday(client,
@@ -86,4 +94,4 @@ def fitbit_download():
                         date = day)
 
 if __name__ == '__main__':
-    fitbit_download()
+    fitbit_download(date(2013, 1, 5))
