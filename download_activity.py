@@ -47,6 +47,7 @@ def get_intraday(client, resource = 'activities/steps', date = date.today()):
 
     return data
 
+
 def get_sleep(client, date):
     path = os.path.join(DATA_DIR, 'sleep', str(date) + '.json')
     if os.path.exists(path):
@@ -58,10 +59,12 @@ def get_sleep(client, date):
 
     return data
 
+
 @rate_limited(299,7200)
 def fetch_sleep(client, date):
     print("Retrieving sleep data for {}".format(date))
     return client.get_sleep(date)
+
 
 @rate_limited(299,7200)
 def fetch_intraday(client, resource = 'activities/steps', date = date.today()):
@@ -69,7 +72,7 @@ def fetch_intraday(client, resource = 'activities/steps', date = date.today()):
     return client.intraday_time_series(resource, base_date = date)
 
 
-if __name__ == '__main__':
+def fitbit_download():
     client = get_client()
 
     start_date = date(2013, 1, 5)
@@ -81,3 +84,6 @@ if __name__ == '__main__':
             get_intraday(client,
                         resource = "activities/{}".format(resource),
                         date = day)
+
+if __name__ == '__main__':
+    fitbit_download()
