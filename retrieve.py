@@ -2,7 +2,9 @@
 # fitbit-python docs: http://python-fitbit.readthedocs.io/en/latest/
 
 from datetime import date, timedelta
+from dateutil.parser import parse
 from ratelimit import rate_limited
+import fire
 import fitbit
 import json
 import os
@@ -70,11 +72,10 @@ def fetch_intraday(client, resource = 'activities/steps', date = date.today()):
     return client.intraday_time_series(resource, base_date = date)
 
 
-def fitbit_download(start_date, quick = True):
+def retrieve(start_date):
     client = get_client()
-
-    # if quick:
-    #     start_date = first_missing_date_since
+    if type(start_date) == str:
+        start_date = parse(start_date).date()
 
     yesterday = date.today() - timedelta(1)
     delta = date.today() - start_date
@@ -94,4 +95,6 @@ def fitbit_download(start_date, quick = True):
                         date = day)
 
 if __name__ == '__main__':
-    fitbit_download(date(2013, 1, 5))
+  fire.Fire({
+      'retrieve': retrieve
+  })
