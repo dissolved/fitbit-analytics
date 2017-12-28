@@ -32,7 +32,7 @@ def get_client():
                          refresh_cb = refresh_tokens)
 
 
-def save_intraday(data, path):
+def write_data(data, path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w') as f:
         json.dump(data, f)
@@ -45,7 +45,7 @@ def get_intraday(client, resource = 'activities/steps', date = date.today()):
             data = json.load(f)
     else:
         data = fetch_intraday(client, resource, date)
-        save_intraday(data, path)
+        write_data(data, path)
 
     return data
 
@@ -57,7 +57,7 @@ def get_sleep(client, date):
             data = json.load(f)
     else:
         data = fetch_sleep(client, date)
-        save_intraday(data, path)
+        write_data(data, path)
 
     return data
 
