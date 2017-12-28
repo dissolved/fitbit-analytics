@@ -50,6 +50,11 @@ def get_intraday(client, resource = 'activities/steps', date = date.today()):
     return data
 
 
+def fetch_intraday(client, resource = 'activities/steps', date = date.today()):
+    print("Retrieving {} intraday for {}".format(resource, date))
+    return client.intraday_time_series(resource, base_date = date)
+
+
 def get_sleep(client, date):
     path = os.path.join(DATA_DIR, 'sleep', str(date) + '.json')
     if os.path.exists(path):
@@ -67,9 +72,22 @@ def fetch_sleep(client, date):
     return client.get_sleep(date)
 
 
-def fetch_intraday(client, resource = 'activities/steps', date = date.today()):
-    print("Retrieving {} intraday for {}".format(resource, date))
-    return client.intraday_time_series(resource, base_date = date)
+def get_heart(client, date):
+    path = os.path.join(DATA_DIR, 'heart', str(date) + '.json')
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            data = json.load(f)
+    else:
+        data = fetch_heart(client, date)
+        write_data(data, path)
+
+    return data
+
+
+def fetch_heart(client, date):
+    print("Retrieving heart rate data for {}".format(date))
+    return client.time_series('activities/heart', base_date = date,
+                                                  period = '1d')
 
 
 def retrieve(start_date):
@@ -84,11 +102,14 @@ def retrieve(start_date):
     if len(activities)*delta.days > HOURLY_API_LIMIT:
         global fetch_intraday
         global fetch_sleep
-        fetch_intraday = rate_limited(2*HOURLY_API_LIMIT - 1, 7200)(fetch_intraday)
-        fetch_sleep = rate_limited(2*HOURLY_API_LIMIT - 1, 7200)(fetch_sleep)
+        global fetch_heart
+        fetch_intraday = rate_limited(3*HOURLY_API_LIMIT - 1, 7200)(fetch_intraday)
+        fetch_sleep = rate_limited(3*HOURLY_API_LIMIT - 1, 7200)(fetch_sleep)
+        fetch_heart = rate_limited(3*HOURLY_API_LIMIT - 1, 7200)(fetch_heart)
 
     for day in (yesterday - timedelta(n) for n in range(delta.days)):
         get_sleep(client, day)
+        get_heart(client, day)
         for resource in activities:
             get_intraday(client,
                         resource = "activities/{}".format(resource),
