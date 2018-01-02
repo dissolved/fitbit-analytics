@@ -4,7 +4,7 @@
 from datetime import date, timedelta
 from dateutil.parser import parse
 # from ratelimit import rate_limited
-# import fire
+import fire
 import fitbit
 import json
 import os
@@ -104,3 +104,7 @@ class Retriever:
         print("Retrieving heart rate data for {}".format(date))
         return self.client.time_series('activities/heart',
                                         base_date = date, period = '1d')
+
+
+if __name__ == '__main__':
+  fire.Fire(Retriever)
