@@ -1,5 +1,4 @@
 * Refactor
-    - Object oriented approach... avoid passing the fitbit client to every method
 * Smarter about whether rate-limiting is necessary or not
     - check existing data in its entirety at beginning to count number of API calls
       necessary
