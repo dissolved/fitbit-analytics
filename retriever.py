@@ -2,7 +2,6 @@
 # fitbit-python docs: http://python-fitbit.readthedocs.io/en/latest/
 
 from datetime import date, timedelta
-from dateutil.parser import parse
 # from ratelimit import rate_limited
 import fire
 import fitbit
@@ -41,7 +40,7 @@ class Retriever:
 
     def retrieve(self, start_date):
         if type(start_date) == str:
-            start_date = parse(start_date).date()
+            start_date = date.fromisoformat(start_date)
 
         yesterday = date.today() - timedelta(1)
         delta = date.today() - start_date
